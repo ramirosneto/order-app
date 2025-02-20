@@ -1,6 +1,7 @@
 package br.com.order.app.data
 
 class OrderRepository constructor(private val orderDao: OrderDao) {
+
     suspend fun insertOrder(order: Order): Long {
         return orderDao.insertOrder(order)
     }

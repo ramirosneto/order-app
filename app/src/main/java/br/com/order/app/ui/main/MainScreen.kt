@@ -1,8 +1,7 @@
 package br.com.order.app.ui.main
 
-import androidx.compose.foundation.Image
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,15 +13,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,62 +44,80 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import br.com.order.app.R
 import br.com.order.app.model.Order
 import br.com.order.app.model.OrderItem
-import br.com.order.app.utils.format
+import br.com.order.app.utils.formatDate
 import br.com.order.app.utils.formatPrice
 import br.com.order.app.viewmodel.MainViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
     val orders = viewModel.orders.collectAsState()
 
-    orders.value?.let {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(it) { order ->
-                OrderRow(order)
-                Spacer(modifier = Modifier.height(8.dp))
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "Pedidos") }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showBottomSheet = true },
+                containerColor = Color.Blue
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    tint = Color.White,
+                    contentDescription = "Adicionar Pedido"
+                )
+            }
+        },
+        content = {
+            orders.value?.let {
+                Column(modifier = Modifier.padding(top = 32.dp)) {
+                    Row {
+                        Text(
+                            text = stringResource(R.string.description),
+                            modifier = Modifier.weight(3f),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.amount),
+                            modifier = Modifier.weight(2f),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = stringResource(R.string.quantity),
+                            modifier = Modifier.weight(1f),
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(text = "", modifier = Modifier.weight(1f))
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        items(it) { order ->
+                            OrderRow(order)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
             }
         }
-    }
-
-    Button(
-        shape = RoundedCornerShape(0.dp),
-        colors = ButtonDefaults.buttonColors(Color.Blue),
-        modifier = Modifier
-            .size(120.dp)
-            .background(Color.Blue),
-        onClick = {
-            showBottomSheet = true
-        }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_add),
-                contentDescription = "Add Icon"
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Add pedido",
-                color = Color.White,
-                fontSize = 16.sp
-            )
-        }
-    }
+    )
 
     if (showBottomSheet) {
         BottomSheet(
@@ -106,28 +132,60 @@ fun MainScreen(viewModel: MainViewModel) {
 
 @Composable
 fun OrderRow(order: Order) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+    Card(
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardColors(Color.White, Color.DarkGray, Color.Red, Color.White),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = order.orderId.toString(), modifier = Modifier.weight(1f))
-        Text(text = order.date.format(), modifier = Modifier.weight(1f))
-        Text(text = order.totalAmount.formatPrice(), modifier = Modifier.weight(1f))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .background(Color.White)
+        ) {
+            Text(text = order.orderId.toString(), modifier = Modifier.weight(1f))
+            Text(text = order.date.formatDate(), modifier = Modifier.weight(3f))
+            Text(text = order.totalAmount.formatPrice(), modifier = Modifier.weight(2f))
+        }
     }
 }
 
 @Composable
-fun OrderItemRow(orderItem: OrderItem) {
+fun OrderItemRow(orderItem: OrderItem, onRemoveClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(top = 8.dp)
     ) {
-        Text(text = orderItem.description, modifier = Modifier.weight(1f))
-        Text(text = orderItem.unitPrice.formatPrice(), modifier = Modifier.weight(1f))
-        Text(text = orderItem.quantity.toString(), modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = orderItem.description,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(3f)
+        )
+        Text(
+            text = orderItem.unitPrice.formatPrice(),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(2f)
+        )
+        Text(
+            text = orderItem.quantity.toString(),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .weight(1f)
+        )
+        IconButton(
+            onClick = onRemoveClick
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(30.dp)
+                    .weight(1f),
+                painter = rememberVectorPainter(image = Icons.Filled.Delete),
+                contentDescription = "Trash Can Icon"
+            )
+        }
     }
 }
 
@@ -150,35 +208,10 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
         sheetState = bottomSheetState,
         onDismissRequest = onDismissRequest
     ) {
-        Box {
-            Column(modifier = Modifier.padding(16.dp)) {
-                LazyColumn {
-                    items(orderItems) { orderItem ->
-                        OrderItemRow(orderItem)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-
-                Button(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .padding(vertical = 16.dp, horizontal = 0.dp),
-                    onClick = { onAddClick(orderItems.toList()) }
-                ) {
-                    Text(
-                        text = "Realizar pedido",
-                        color = Color.White,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-        }
-
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxSize()
+                .fillMaxWidth()
         ) {
             OutlinedTextField(
                 value = description.value,
@@ -186,7 +219,7 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
                     description.value = it
                     descriptionError = false
                 },
-                label = { Text("Descrição") },
+                label = { Text(stringResource(R.string.description)) },
                 isError = descriptionError,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -195,7 +228,7 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
             )
             if (descriptionError) {
                 Text(
-                    text = "Campo obrigatório",
+                    text = stringResource(R.string.mandatory_field),
                     color = Color.Red,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -209,7 +242,7 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
                         unitPrice.value = it
                         unitPriceError = false
                     },
-                    label = { Text("Valor") },
+                    label = { Text(stringResource(R.string.amount)) },
                     isError = unitPriceError,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.padding(end = 8.dp)
@@ -227,7 +260,7 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
                         quantity.value = it
                         quantityError = false
                     },
-                    label = { Text("Qtd") },
+                    label = { Text(stringResource(R.string.quantity)) },
                     isError = quantityError,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
@@ -253,7 +286,7 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
                     unitPriceError = price == null
 
                     if (descriptionError.not() && quantityError.not() && unitPriceError.not()) {
-                        val itemTotalPrice = quantity.value.toDouble() * unitPrice.value.toInt()
+                        val itemTotalPrice = quantity.value.toInt() * unitPrice.value.toDouble()
                         val orderItem = OrderItem(
                             description = description.value,
                             quantity = quantity.value.toInt(),
@@ -271,10 +304,57 @@ fun BottomSheet(onAddClick: (List<OrderItem>) -> Unit, onDismissRequest: () -> U
                 }
             ) {
                 Text(
-                    text = "Adicionar item",
+                    text = stringResource(R.string.add_order_item),
                     color = Color.White,
                     fontSize = 16.sp
                 )
+            }
+        }
+
+        Box {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row {
+                    Text(
+                        text = stringResource(R.string.description),
+                        modifier = Modifier.weight(3f),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = stringResource(R.string.amount),
+                        modifier = Modifier.weight(2f),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = stringResource(R.string.quantity),
+                        modifier = Modifier.weight(1f),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(text = "", modifier = Modifier.weight(1f))
+                }
+
+                LazyColumn {
+                    items(orderItems) { orderItem ->
+                        OrderItemRow(orderItem) {
+                            orderItems.remove(orderItem)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(vertical = 16.dp, horizontal = 0.dp),
+                    enabled = orderItems.size > 0,
+                    onClick = { onAddClick(orderItems.toList()) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.place_order),
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }

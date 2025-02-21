@@ -9,7 +9,7 @@ import androidx.room.Transaction
 @Dao
 interface OrderDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrder(orderEntity: OrderEntity): Int
+    suspend fun insertOrder(orderEntity: OrderEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrderItem(orderItemEntity: OrderItemEntity)

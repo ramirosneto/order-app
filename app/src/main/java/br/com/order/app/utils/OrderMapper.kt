@@ -10,7 +10,7 @@ class OrderMapper {
     fun mapOrderModelToEntity(orderModel: Order): OrderEntity {
         return OrderEntity(
             orderId = orderModel.orderId,
-            date = orderModel.date,
+            date = orderModel.date.toString(),
             totalAmount = orderModel.totalAmount
         )
     }
@@ -18,12 +18,12 @@ class OrderMapper {
     fun mapOrderEntityToModel(orderEntity: OrderEntity): Order {
         return Order(
             orderId = orderEntity.orderId,
-            date = orderEntity.date,
+            date = orderEntity.date.format(),
             totalAmount = orderEntity.totalAmount
         )
     }
 
-    fun mapOrderItemModelToEntity(orderId: Int, orderItemModel: OrderItem): OrderItemEntity {
+    fun mapOrderItemModelToEntity(orderId: Long, orderItemModel: OrderItem): OrderItemEntity {
         return OrderItemEntity(
             orderId = orderId,
             description = orderItemModel.description,

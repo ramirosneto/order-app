@@ -12,7 +12,8 @@ class OrderRepository(
 
     suspend fun insertOrder(orderItems: List<OrderItem>) {
         val totalAmount = orderItems.sumOf { it.totalPrice }
-        val orderEntity = OrderEntity(date = LocalDateTime.now(), totalAmount = totalAmount)
+        val now = LocalDateTime.now().toString()
+        val orderEntity = OrderEntity(date = now, totalAmount = totalAmount)
         val orderId = orderDao.insertOrder(orderEntity)
         orderItems.forEach { orderItem ->
             orderDao.insertOrderItem(mapper.mapOrderItemModelToEntity(orderId, orderItem))

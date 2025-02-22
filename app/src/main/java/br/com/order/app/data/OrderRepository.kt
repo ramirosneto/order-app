@@ -3,6 +3,8 @@ package br.com.order.app.data
 import br.com.order.app.model.Order
 import br.com.order.app.model.OrderItem
 import br.com.order.app.utils.OrderMapper
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
 
 class OrderRepository(
@@ -20,21 +22,19 @@ class OrderRepository(
         }
     }
 
-    suspend fun getAllOrders(): List<Order> {
-        val orders = arrayListOf<Order>()
-        orderDao.getAllOrders().forEach { order ->
-            orders.add(mapper.mapOrderEntityToModel(order))
+    fun getAllOrders(): Flow<List<Order>> {
+        return orderDao.getAllOrders().map { ordersEntity ->
+            ordersEntity.map { mapper.mapOrderEntityToModel(it) }
         }
-
-        return orders
     }
 
-    suspend fun getAllOrderItems(orderId: Int): List<OrderItem> {
-        val orderItems = arrayListOf<OrderItem>()
-        orderDao.getAllOrderItems(orderId).forEach { orderItem ->
-            orderItems.add(mapper.mapOrderItemEntityToModel(orderItem))
+    fun getAllOrderItems(orderId: Long): Flow<List<OrderItem>> {
+        return orderDao.getAllOrderItems(orderId).map { orderItemEntity ->
+            orderItemEntity.map { mapper.mapOrderItemEntityToModel(it) }
         }
+    }
 
-        return orderItems
+    suspend fun deleteOrder(orderId: Long) {
+        orderDao.deleteOrder(orderId)
     }
 }

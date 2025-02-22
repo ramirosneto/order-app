@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 @Entity(tableName = "orders")
 data class OrderEntity(
-    @PrimaryKey(autoGenerate = true) val orderId: Int = 0,
+    @PrimaryKey(autoGenerate = true) val orderId: Long = 0,
     val date: String,
     val totalAmount: Double
 )

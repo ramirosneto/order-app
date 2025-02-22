@@ -5,28 +5,25 @@ import androidx.lifecycle.viewModelScope
 import br.com.order.app.data.OrderRepository
 import br.com.order.app.model.Order
 import br.com.order.app.model.OrderItem
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: OrderRepository) : ViewModel() {
 
-    private val _orders = MutableStateFlow<List<Order>?>(null)
-    val orders: StateFlow<List<Order>?> get() = _orders
-
-    init {
-        getOrders()
-    }
-
-    private fun getOrders() {
-        viewModelScope.launch {
-            _orders.value = repository.getAllOrders()
-        }
-    }
+    val orders: StateFlow<List<Order>> =
+        repository.getAllOrders().stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun addOrder(orderItems: List<OrderItem>) {
         viewModelScope.launch {
             repository.insertOrder(orderItems)
+        }
+    }
+
+    fun deleteOrder(order: Order) {
+        viewModelScope.launch {
+            repository.deleteOrder(order.orderId)
         }
     }
 }

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OrderDao {
@@ -16,9 +17,13 @@ interface OrderDao {
 
     @Transaction
     @Query("SELECT * FROM orders")
-    suspend fun getAllOrders(): List<OrderEntity>
+    fun getAllOrders(): Flow<List<OrderEntity>>
 
     @Transaction
     @Query("SELECT * FROM order_items WHERE orderId = :orderId")
-    suspend fun getAllOrderItems(orderId: Int): List<OrderItemEntity>
+    fun getAllOrderItems(orderId: Long): Flow<List<OrderItemEntity>>
+
+    @Transaction
+    @Query("DELETE FROM orders WHERE orderId = :orderId")
+    suspend fun deleteOrder(orderId: Long)
 }

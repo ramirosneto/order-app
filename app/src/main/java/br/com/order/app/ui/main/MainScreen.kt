@@ -1,11 +1,11 @@
 package br.com.order.app.ui.main
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -53,6 +52,8 @@ import androidx.compose.ui.unit.sp
 import br.com.order.app.R
 import br.com.order.app.model.Order
 import br.com.order.app.model.OrderItem
+import br.com.order.app.ui.components.ActionIcon
+import br.com.order.app.ui.components.SwipeableItemWithActions
 import br.com.order.app.utils.formatDate
 import br.com.order.app.utils.formatPrice
 import br.com.order.app.viewmodel.MainViewModel
@@ -110,7 +111,28 @@ fun MainScreen(viewModel: MainViewModel) {
                             .padding(16.dp)
                     ) {
                         items(it) { order ->
-                            OrderRow(order)
+                            Card(
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                SwipeableItemWithActions(
+                                    isRevealed = order.isDeleteRevealed,
+                                    onExpanded = { order.isDeleteRevealed = true },
+                                    onCollapsed = { order.isDeleteRevealed = false },
+                                    actions = {
+                                        ActionIcon(
+                                            onClick = {
+                                                viewModel.deleteOrder(order)
+                                            },
+                                            backgroundColor = Color.Red,
+                                            icon = Icons.Default.Delete,
+                                            modifier = Modifier.fillMaxHeight()
+                                        )
+                                    },
+                                ) {
+                                    OrderRow(order)
+                                }
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
@@ -132,21 +154,14 @@ fun MainScreen(viewModel: MainViewModel) {
 
 @Composable
 fun OrderRow(order: Order) {
-    Card(
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardColors(Color.White, Color.DarkGray, Color.Red, Color.White),
-        modifier = Modifier.fillMaxWidth()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(Color.White)
-        ) {
-            Text(text = order.orderId.toString(), modifier = Modifier.weight(1f))
-            Text(text = order.date.formatDate(), modifier = Modifier.weight(3f))
-            Text(text = order.totalAmount.formatPrice(), modifier = Modifier.weight(2f))
-        }
+        Text(text = order.orderId.toString(), modifier = Modifier.weight(1f))
+        Text(text = order.date.formatDate(), modifier = Modifier.weight(3f))
+        Text(text = order.totalAmount.formatPrice(), modifier = Modifier.weight(2f))
     }
 }
 

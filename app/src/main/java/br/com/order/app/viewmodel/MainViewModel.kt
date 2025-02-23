@@ -22,7 +22,7 @@ class MainViewModel(private val repository: OrderRepository) : ViewModel() {
         fetchOrders()
     }
 
-    private fun fetchOrders() {
+    fun fetchOrders() {
         viewModelScope.launch {
             try {
                 repository.getAllOrders().collect { orders ->

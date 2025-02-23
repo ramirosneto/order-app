@@ -54,8 +54,11 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.koin)
 
+    testImplementation(libs.mockk)
     testImplementation(libs.junit)
     testImplementation(libs.koin.test)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.arch.core.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

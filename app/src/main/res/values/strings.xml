@@ -13,4 +13,6 @@
     <string name="confirmation_dialog_msg">Deseja realmente deletar este pedido?</string>
     <string name="confirmation_dialog_cancel_btn">Cancelar</string>
     <string name="confirmation_dialog_confirm_btn">Sim</string>
+    <string name="place_order_dialog_confirm_msg">Deseja realmente finalizar o pedido?</string>
+    <string name="order_placed_success">Pedido realizado com sucesso!</string>
 </resources>

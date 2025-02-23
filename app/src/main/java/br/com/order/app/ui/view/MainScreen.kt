@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -33,6 +32,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -40,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,15 +62,21 @@ import br.com.order.app.ui.components.SwipeableItemWithActions
 import br.com.order.app.utils.formatDate
 import br.com.order.app.utils.formatPrice
 import br.com.order.app.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     var showBottomSheet by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
     val orders = viewModel.orders.collectAsState()
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             TopAppBar(
                 title = { Text(text = stringResource(R.string.orders)) }
@@ -90,7 +98,13 @@ fun MainScreen(viewModel: MainViewModel) {
             orders.value.let {
                 Column(modifier = Modifier.padding(top = 32.dp)) {
                     OrdersHeader()
-                    OrdersContent(it, viewModel)
+                    OrdersContent(it, viewModel) {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Pedido deletado com sucesso"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -101,6 +115,11 @@ fun MainScreen(viewModel: MainViewModel) {
             onAddClick = { orderItems ->
                 viewModel.addOrder(orderItems)
                 showBottomSheet = false
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Pedido realizado com sucesso!"
+                    )
+                }
             },
             onDismissRequest = { showBottomSheet = false }
         )
@@ -130,7 +149,11 @@ fun OrdersHeader() {
 }
 
 @Composable
-fun OrdersContent(orders: List<OrderWithItems>, viewModel: MainViewModel) {
+fun OrdersContent(
+    orders: List<OrderWithItems>,
+    viewModel: MainViewModel,
+    showSnackBar: () -> Unit
+) {
     var showDialog by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -167,7 +190,10 @@ fun OrdersContent(orders: List<OrderWithItems>, viewModel: MainViewModel) {
                                 ConfirmationDialog(
                                     title = stringResource(R.string.confirmation_dialog_title),
                                     message = stringResource(R.string.confirmation_dialog_msg),
-                                    onConfirm = { viewModel.deleteOrder(order.order) },
+                                    onConfirm = {
+                                        viewModel.deleteOrder(order.order)
+                                        showSnackBar()
+                                    },
                                     onDismiss = { showDialog = false }
                                 )
                             }

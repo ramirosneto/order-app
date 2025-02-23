@@ -1,5 +1,6 @@
 package br.com.order.app.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -36,6 +38,8 @@ import br.com.order.app.R
 import br.com.order.app.model.OrderItem
 import br.com.order.app.ui.view.OrderItemRow
 
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(
@@ -53,6 +57,7 @@ fun BottomSheet(
     var descriptionError by remember { mutableStateOf(false) }
     var quantityError by remember { mutableStateOf(false) }
     var unitPriceError by remember { mutableStateOf(false) }
+    var showConfirmationAlert by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
@@ -197,18 +202,37 @@ fun BottomSheet(
                         .fillMaxWidth()
                         .height(80.dp)
                         .padding(vertical = 16.dp, horizontal = 0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Green,
+                        contentColor = Color.Black
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 8.dp,
+                        pressedElevation = 12.dp,
+                        disabledElevation = 0.dp
+                    ),
                     enabled = orderItems.size > 0,
                     onClick = {
-                        onAddClick(orderItems.toList())
+                        showConfirmationAlert = true
                     }
                 ) {
                     Text(
                         text = stringResource(R.string.place_order),
-                        color = Color.White,
                         fontSize = 16.sp
                     )
                 }
             }
+        }
+
+        if (showConfirmationAlert) {
+            ConfirmationDialog(
+                title = stringResource(R.string.confirmation_dialog_title),
+                message = stringResource(R.string.place_order_dialog_confirm_msg),
+                onConfirm = {
+                    onAddClick(orderItems.toList())
+                },
+                onDismiss = { showConfirmationAlert = false }
+            )
         }
     }
 }

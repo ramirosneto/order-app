@@ -97,7 +97,7 @@ fun BottomSheet(
                         unitPrice.value = it
                         unitPriceError = false
                     },
-                    label = { Text(stringResource(R.string.amount)) },
+                    label = { Text(stringResource(R.string.unit_amount)) },
                     isError = unitPriceError,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.padding(end = 8.dp)
@@ -181,7 +181,7 @@ fun BottomSheet(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(R.string.amount),
+                        text = stringResource(R.string.unit_amount),
                         modifier = Modifier.weight(2f),
                         fontWeight = FontWeight.Bold
                     )

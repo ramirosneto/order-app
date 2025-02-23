@@ -5,7 +5,7 @@
     <string name="description">Descrição</string>
     <string name="add_order_item">Adicionar item</string>
     <string name="quantity">Qtd</string>
-    <string name="amount">Valor</string>
+    <string name="unit_amount">Valor unit.</string>
     <string name="create_order">Criar pedido</string>
     <string name="place_order">Realizar pedido</string>
     <string name="delete_icon_description">Botão de deletar</string>

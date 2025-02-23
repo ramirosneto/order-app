@@ -15,8 +15,8 @@ class MainViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _orders = MutableStateFlow<List<OrderWithItems>>(emptyList())
     val orders: StateFlow<List<OrderWithItems>> get() = _orders
 
-    private val _error = MutableStateFlow("")
-    val error: StateFlow<String> get() = _error
+    private val _error = MutableStateFlow<String?>(null)
+    val error: MutableStateFlow<String?> get() = _error
 
     init {
         fetchOrders()

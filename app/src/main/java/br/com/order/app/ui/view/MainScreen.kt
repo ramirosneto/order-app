@@ -72,7 +72,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val orders = viewModel.orders.collectAsState()
-    val error = viewModel.error.collectAsState()
+    val error = viewModel.error.collectAsState(null)
 
     Scaffold(
         snackbarHost = {
@@ -109,10 +109,10 @@ fun MainScreen(viewModel: MainViewModel) {
                 }
             }
 
-            error.apply {
+            error.value?.let {
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(
-                        message = this@apply.toString()
+                        message = it
                     )
                 }
             }
@@ -144,7 +144,7 @@ fun OrdersHeader() {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = stringResource(R.string.amount),
+            text = stringResource(R.string.unit_amount),
             modifier = Modifier.weight(2f),
             fontWeight = FontWeight.Bold
         )
@@ -273,7 +273,7 @@ fun OrderItemHeader() {
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = stringResource(R.string.amount),
+            text = stringResource(R.string.unit_amount),
             modifier = Modifier.weight(2f),
             fontWeight = FontWeight.Bold
         )

@@ -13,17 +13,23 @@ interface OrderDao {
     suspend fun insertOrder(orderEntity: OrderEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertOrderItem(orderItemEntity: OrderItemEntity)
+    suspend fun insertOrderItems(orderItemsEntity: List<OrderItemEntity>)
 
-    @Transaction
     @Query("SELECT * FROM orders")
     fun getAllOrders(): Flow<List<OrderEntity>>
 
-    @Transaction
-    @Query("SELECT * FROM order_items WHERE orderId = :orderId")
-    fun getAllOrderItems(orderId: Long): Flow<List<OrderItemEntity>>
+    @Query("SELECT * FROM order_items")
+    fun getAllOrderItems(): Flow<List<OrderItemEntity>>
 
-    @Transaction
     @Query("DELETE FROM orders WHERE orderId = :orderId")
     suspend fun deleteOrder(orderId: Long)
+
+    @Query("DELETE FROM order_items WHERE orderId = :orderId")
+    suspend fun deleteOrderItems(orderId: Long)
+
+    @Transaction
+    suspend fun deleteOrderAndItems(orderId: Long) {
+        deleteOrder(orderId)
+        deleteOrderItems(orderId)
+    }
 }

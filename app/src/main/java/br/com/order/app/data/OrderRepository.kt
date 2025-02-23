@@ -1,40 +1,52 @@
 package br.com.order.app.data
 
-import br.com.order.app.model.Order
+import androidx.room.Transaction
 import br.com.order.app.model.OrderItem
+import br.com.order.app.model.OrderWithItems
 import br.com.order.app.utils.OrderMapper
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime
+import kotlin.math.round
 
 class OrderRepository(
     private val mapper: OrderMapper,
     private val orderDao: OrderDao
 ) {
 
+    @Transaction
     suspend fun insertOrder(orderItems: List<OrderItem>) {
         val totalAmount = orderItems.sumOf { it.totalPrice }
         val now = LocalDateTime.now().toString()
-        val orderEntity = OrderEntity(date = now, totalAmount = totalAmount)
+        val orderEntity = OrderEntity(date = now, totalAmount = round(totalAmount))
         val orderId = orderDao.insertOrder(orderEntity)
-        orderItems.forEach { orderItem ->
-            orderDao.insertOrderItem(mapper.mapOrderItemModelToEntity(orderId, orderItem))
+
+        val orderItemEntities = orderItems.map { orderItem ->
+            mapper.mapOrderItemModelToEntity(orderId, orderItem)
         }
+
+        orderDao.insertOrderItems(orderItemEntities)
     }
 
-    fun getAllOrders(): Flow<List<Order>> {
-        return orderDao.getAllOrders().map { ordersEntity ->
+    @Transaction
+    fun getAllOrders(): Flow<List<OrderWithItems>> {
+        val orders = orderDao.getAllOrders().map { ordersEntity ->
             ordersEntity.map { mapper.mapOrderEntityToModel(it) }
         }
-    }
-
-    fun getAllOrderItems(orderId: Long): Flow<List<OrderItem>> {
-        return orderDao.getAllOrderItems(orderId).map { orderItemEntity ->
+        val ordersItems = orderDao.getAllOrderItems().map { orderItemEntity ->
             orderItemEntity.map { mapper.mapOrderItemEntityToModel(it) }
+        }
+
+        return orders.combine(ordersItems) { ordersList, itemsList ->
+            ordersList.map { order ->
+                val items = itemsList.filter { it.orderId == order.orderId }
+                OrderWithItems(order, items)
+            }
         }
     }
 
     suspend fun deleteOrder(orderId: Long) {
-        orderDao.deleteOrder(orderId)
+        orderDao.deleteOrderAndItems(orderId)
     }
 }

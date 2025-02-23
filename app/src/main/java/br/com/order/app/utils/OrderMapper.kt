@@ -35,6 +35,7 @@ class OrderMapper {
 
     fun mapOrderItemEntityToModel(orderItemEntity: OrderItemEntity): OrderItem {
         return OrderItem(
+            orderId = orderItemEntity.orderId,
             description = orderItemEntity.description,
             quantity = orderItemEntity.quantity,
             unitPrice = orderItemEntity.unitPrice,

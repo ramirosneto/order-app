@@ -138,6 +138,7 @@ fun BottomSheet(
                     if (descriptionError.not() && quantityError.not() && unitPriceError.not()) {
                         val itemTotalPrice = quantity.value.toInt() * unitPrice.value.toDouble()
                         val orderItem = OrderItem(
+                            orderId = 0,
                             description = description.value,
                             quantity = quantity.value.toInt(),
                             unitPrice = unitPrice.value.toDouble(),
@@ -170,13 +171,13 @@ fun BottomSheet(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(R.string.amount),
-                        modifier = Modifier.weight(2f),
+                        text = stringResource(R.string.quantity),
+                        modifier = Modifier.weight(1f),
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = stringResource(R.string.quantity),
-                        modifier = Modifier.weight(1f),
+                        text = stringResource(R.string.amount),
+                        modifier = Modifier.weight(2f),
                         fontWeight = FontWeight.Bold
                     )
                     Text(text = "", modifier = Modifier.weight(1f))

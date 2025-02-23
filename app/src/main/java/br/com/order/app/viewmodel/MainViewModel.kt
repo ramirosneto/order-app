@@ -7,9 +7,7 @@ import br.com.order.app.model.Order
 import br.com.order.app.model.OrderItem
 import br.com.order.app.model.OrderWithItems
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: OrderRepository) : ViewModel() {
@@ -17,27 +15,42 @@ class MainViewModel(private val repository: OrderRepository) : ViewModel() {
     private val _orders = MutableStateFlow<List<OrderWithItems>>(emptyList())
     val orders: StateFlow<List<OrderWithItems>> get() = _orders
 
+    private val _error = MutableStateFlow("")
+    val error: StateFlow<String> get() = _error
+
     init {
         fetchOrders()
     }
 
     private fun fetchOrders() {
         viewModelScope.launch {
-            repository.getAllOrders().collect { orders ->
-                _orders.value = orders
+            try {
+                repository.getAllOrders().collect { orders ->
+                    _orders.value = orders
+                }
+            } catch (e: Exception) {
+                _error.value = "Erro ao buscar pedidos - cod: ${e.message.toString()}"
             }
         }
     }
 
     fun addOrder(orderItems: List<OrderItem>) {
         viewModelScope.launch {
-            repository.insertOrder(orderItems)
+            try {
+                repository.insertOrder(orderItems)
+            } catch (e: Exception) {
+                _error.value = "Erro ao adicionar pedido - cod: ${e.message.toString()}"
+            }
         }
     }
 
     fun deleteOrder(order: Order) {
         viewModelScope.launch {
-            repository.deleteOrder(order.orderId)
+            try {
+                repository.deleteOrder(order.orderId)
+            } catch (e: Exception) {
+                _error.value = "Erro ao deletar pedido - cod: ${e.message.toString()}"
+            }
         }
     }
 }

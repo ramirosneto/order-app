@@ -72,6 +72,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val orders = viewModel.orders.collectAsState()
+    val error = viewModel.error.collectAsState()
 
     Scaffold(
         snackbarHost = {
@@ -105,6 +106,14 @@ fun MainScreen(viewModel: MainViewModel) {
                             )
                         }
                     }
+                }
+            }
+
+            error.apply {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = this@apply.toString()
+                    )
                 }
             }
         }
